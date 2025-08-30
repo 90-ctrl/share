@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<!-- saved from url=(0036)file:///Users/Y/Downloads/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Builder</title>
+<style>
+:root {
+  --bg: #10131a;
+  --panel: #171b24;
+  --panel-2: #141721;
+  --border: #232a3a;
+  --text: #f4f6fa;
+  --sub: #aeb7c6;
+  --accent: #0a84ff;
+  --accent-2: #5e5ce6;
+  --accent-3: #32d74b;
+  --danger: #ff375f;
+  --good: #32d74b;
+  --warn: #ffd60a;
+  --shadow: 0 14px 40px rgba(0,0,0,.24);
+  --gutter: 180px;
+  --timeline-min-h: 360px;
+}
+* { box-sizing: border-box; min-width:0; }
+body {
+  margin: 0;
+  color: var(--text);
+  background: linear-gradient(180deg, #10131a 0%, #151925 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.6;
+}
+.wrap {
+  max-width: 1200px;
+  margin: 26px auto 40px;
+  padding: 0 18px;
+}
+/* Sticky top bar with only Generate, Copy, Reset */
+.topbar {
+  position: sticky; top: 0; z-index: 22;
+  backdrop-filter: saturate(180%) blur(16px);
+  background: rgba(16,19,26,.74);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px; justify-content: space-between;
+}
+h1 { font-size: .98rem; margin: 0; font-weight: 700; letter-spacing: .2px; }
+.actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+button, .btn {
+  appearance: none; border: none;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+  color: var(--text); border-radius: 12px; padding: 8px 12px; font-weight: 600;
+  cursor: pointer; box-shadow: var(--shadow); font-size: .94rem;
+  transition: background 0.15s, border 0.15s, transform .06s ease;
+  outline: none; border: 1.5px solid var(--border);
+}
+button:active { transform: translateY(1px); }
+button:focus, .btn:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+button.primary { border-color: var(--accent); background: linear-gradient(180deg, var(--accent) 0%, #0b6ddb 100%); color: white; }
+button.ghost { background: transparent; box-shadow: none; border-color: var(--border); color: var(--text); }
+button.small { padding: 6px 10px; border-radius: 10px; font-weight: 600; font-size: .9rem; }
+select, input[type="number"], input[type='text'], textarea {
+  width: 100%; border: 1.5px solid var(--border); background: #151924; color: var(--text);
+  border-radius: 10px; padding: 9px 10px; font-size: .95rem; transition: border 0.15s;
+}
+select:focus, input:focus, textarea:focus { border-color: var(--accent); outline: none; }
+.multiselect { min-height: 40px; }
+.multiselect[size] { height: auto; min-height: 44px; }
+.small { font-size: .9rem; color: var(--sub); }
+.card {
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+}
+.card.compact { padding: 10px 10px; }
+.section-title { font-size: 1.02rem; letter-spacing: .2px; color: #e4eaff; margin: 0 0 10px; font-weight: 700; }
+.label-row {
+  display: grid; grid-template-columns: 200px 1fr; gap: 12px; align-items: start; margin: 10px 0;
+}
+@media(max-width:700px){ .label-row{grid-template-columns:1fr} }
+.subgroup { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 10px; }
+.output {
+  white-space: pre-wrap; background: #151e30; border: 1.5px dashed #29324a;
+  padding: 14px; border-radius: 12px; min-height: 160px; font-size: .96rem; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+/* Timeline card */
+.timeline-card .top-ctrls,
+.timeline-card .bottom-utilities,
+.timeline-card .statusbar {
+  display: grid; gap: 10px; align-items: center;
+}
+.timeline-card .top-ctrls { grid-template-columns: 1fr auto; margin-bottom: 10px; }
+.timeline-card .evgroup,
+.timeline-card .lenGroup { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.evbar { display:flex; gap:6px; flex-wrap:wrap; }
+.evbtn{
+  display:inline-flex; align-items:center; gap:6px;
+  border: 1.5px solid var(--border); background:#162036; color:#e5ebff;
+  padding:6px 10px; border-radius:10px; cursor:pointer; font-size:.9rem; white-space:nowrap;
+}
+.evbtn .sw{ width:12px; height:12px; border-radius:50%; }
+.evbtn.active{ outline:2px solid var(--accent); background:#1c2641; border-color:var(--accent); }
+.timeline-card .lenGroup input{ max-width: 100px; }
+.timeline-card .canvas-wrap{ position: relative; }
+.timeline-labels { position:absolute; top:0; left:0; width:var(--gutter); height:100%; background:transparent; z-index:10; pointer-events:none; border-right:1px solid var(--border); }
+.timeline-labels .lbl{ position:absolute; left:14px; right:10px; height:22px; line-height:22px; font-weight:600; color:#e4eaff; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tooltip {
+  position: fixed; pointer-events: none; transform: translate(-50%, calc(-100% - 12px));
+  background: #0f1524; color: var(--text); border: 1px solid var(--border); border-radius: 10px;
+  padding: 8px 10px; font-size: .92rem; box-shadow: 0 6px 18px rgba(0,0,0,.25); opacity: 0; transition: opacity .08s ease; z-index: 30;
+}
+.statusbar { color: var(--sub); font-size:.92rem; grid-template-columns: 1fr auto; margin-top: 10px; }
+.statusbar .sep{ opacity:.4; }
+.controlGroup {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border); background: #12192a; border-radius: 12px; padding: 6px 10px; flex-wrap: wrap;
+}
+.bottom-utilities { grid-template-columns: repeat(3, minmax(220px, 1fr)); margin-top: 10px; }
+.utilityGroup { display:flex; gap:8px; align-items:center; flex-wrap:wrap; border: 1px solid var(--border); background: #12192a; border-radius: 12px; padding: 8px 10px; }
+.utilityGroup label{ margin-right:6px; color:var(--sub); font-size:.92rem; }
+@media(max-width:1100px){ .bottom-utilities{ grid-template-columns: repeat(2, minmax(220px, 1fr)); } }
+@media(max-width:700px){ .bottom-utilities{ grid-template-columns: 1fr; } }
+
+/* Chips for track toggles */
+.chip { border: 1.4px solid var(--border); background:#161e2e; color:#e4eaff; padding:6px 10px; border-radius:999px; cursor:pointer; font-size:.9rem; display:inline-flex; align-items:center; gap:8px; }
+.chip .sw { width:12px; height:12px; border-radius:3px; background:#fff; }
+.chip.active { outline: 2px solid var(--accent); background:#1c2641; border-color: var(--accent); opacity: 1; }
+.chip.inactive { opacity:.55; }
+
+/* Accordion (Baselines) */
+.accordion .item { border: 1.5px solid var(--border); border-radius: 12px; background: linear-gradient(180deg,#171e2c 0%, #171b29 100%); margin-bottom: 6px; }
+.item-header { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 10px 12px; cursor:pointer; }
+.item-title { font-weight:600; font-size:.95rem; }
+.item-meta { color: var(--accent-2); font-size:.9rem; margin-left:6px; }
+.item-body { display:none; padding: 0 12px 12px; }
+.item.open .item-body { display:block; }
+.caret { transition: transform .2s ease; font-size:1.1rem; } .item.open .caret { transform: rotate(90deg); }
+
+/* Scrollbar */
+::-webkit-scrollbar { height: 10px; width: 10px; background: var(--panel-2);}
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px;}
+
+/* === UI polish: consistent control heights & fonts === */
+:root {
+  --ctrl-h: 38px;
+}
+button.small, select.small, .utilityGroup button.small, .utilityGroup select.small,
+.evbtn, .lenGroup input[type="number"] {
+  height: var(--ctrl-h);
+  line-height: calc(var(--ctrl-h) - 2px);
+}
+.evgroup.controlGroup, .lenGroup.controlGroup, .utilityGroup {
+  min-height: calc(var(--ctrl-h) + 12px);
+  align-items: center;
+}
+/* Match Event & Length boxes */
+.timeline-card .top-ctrls { align-items: stretch; }
+.evgroup.controlGroup, .lenGroup.controlGroup { display:flex; }
+/* Prevent overflow poking outside */
+.timeline-card .canvas-wrap { overflow: hidden; border-radius: 12px; }
+/* Slight gap between text column and start of tracks */
+.timeline-labels { padding-right: 14px; }
+/* Make Preset, Grid view, Project boxes equal height */
+.bottom-utilities { align-items: stretch; }
+.utilityGroup { height: 100%; }
+/* Cleaner, consistent fonts */
+body { font-feature-settings: "tnum" 1, "ss01" 1; }
+.section-title { font-weight: 700; letter-spacing: .2px; }
+.label-row > label { font-weight: 600; color: var(--sub); }
+
+
+/* Center button text uniformly */
+button, .btn, .ghost, .primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <h1> Prompt Builder <span class="small"> V3.3</span></h1>
+      <div class="actions">
+        <button class="primary small" id="gen">Generate</button>
+        <button class="ghost small" id="copy">Copy</button>
+        <button class="small" id="resetTimeline" title="Reset all tracks to neutral baselines; clear keyframes &amp; events.">Reset</button>
+        <span id="copied" class="small" style="display:none">✓</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- TIMELINE (boxed card) -->
+    <section class="card timeline-card" id="timelineCard">
+      <div class="section-title">Timeline Editor</div>
+
+      <!-- Top controls: Event picker + Length (as requested on top) -->
+      <div class="top-ctrls">
+        <div class="evgroup controlGroup">
+          <label class="small">Event</label>
+          <div class="evbar" id="evbar"><button class="evbtn active" type="button"><span class="sw" style="background: rgb(100, 210, 255);"></span>Story turn</button><button class="evbtn" type="button"><span class="sw" style="background: rgb(50, 215, 75);"></span>Escalation</button><button class="evbtn" type="button"><span class="sw" style="background: rgb(255, 55, 95);"></span>Peak</button><button class="evbtn" type="button"><span class="sw" style="background: rgb(94, 92, 230);"></span>Valley</button><button class="evbtn" type="button"><span class="sw" style="background: rgb(255, 214, 10);"></span>Loop tease</button><button class="evbtn" type="button"><span class="sw" style="background: rgb(160, 167, 181);"></span>Countdown</button><button class="evbtn" type="button"><span class="sw" style="background: rgb(255, 159, 10);"></span>Climax</button><button class="evbtn" type="button"><span class="sw" style="background: rgb(48, 176, 199);"></span>Aftercare</button></div>
+        </div>
+        <div class="lenGroup controlGroup">
+          <label class="small">Length (min)</label>
+          <input id="length" type="number" min="3" max="60" value="12">
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="canvas-wrap">
+        <div class="timeline-labels" id="timelineLabels"><div class="lbl" style="top: 46px;">Events</div><div class="lbl" style="top: 92px;">Loving ↔ Filthy</div><div class="lbl" style="top: 136px;">Gentle ↔ Aggressive</div><div class="lbl" style="top: 180px;">Light ↔ Serious</div><div class="lbl" style="top: 224px;">Tease intensity</div><div class="lbl" style="top: 268px;">Detail level</div><div class="lbl" style="top: 312px;">Explicitness</div><div class="lbl" style="top: 356px;">Sensory imagery</div><div class="lbl" style="top: 400px;">Affirmation</div><div class="lbl" style="top: 444px;">Degradation</div></div>
+        <canvas id="timeline" width="2266" height="1092" style="width: 1133px; height: 546px;"></canvas>
+        <div id="tooltip" class="tooltip" style="opacity: 0; left: 931px; top: 670px;"><b>degrad</b><br>t=7.8m • v=3<div class="small">Drag to move • Double-click to delete</div></div>
+      </div>
+
+      <!-- Legend / Track toggles -->
+      <div class="timeline-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+        <span id="cursorReadout" class="small" style="align-self:center;margin-right:4px;">t=0m, value=—, track=—</span>
+        <div id="legend" style="display:flex;flex-wrap:wrap;gap:8px;"><button class="chip active" style="border-color: rgb(10, 132, 255);"><span class="sw" style="background: rgb(10, 132, 255);"></span><span>Loving ↔ Filthy</span></button><button class="chip active" style="border-color: rgb(94, 92, 230);"><span class="sw" style="background: rgb(94, 92, 230);"></span><span>Gentle ↔ Aggressive</span></button><button class="chip active" style="border-color: rgb(100, 210, 255);"><span class="sw" style="background: rgb(100, 210, 255);"></span><span>Light ↔ Serious</span></button><button class="chip active" style="border-color: rgb(48, 176, 199);"><span class="sw" style="background: rgb(48, 176, 199);"></span><span>Tease intensity</span></button><button class="chip active" style="border-color: rgb(50, 215, 75);"><span class="sw" style="background: rgb(50, 215, 75);"></span><span>Detail level</span></button><button class="chip active" style="border-color: rgb(191, 90, 242);"><span class="sw" style="background: rgb(191, 90, 242);"></span><span>Explicitness</span></button><button class="chip active" style="border-color: rgb(255, 160, 166);"><span class="sw" style="background: rgb(255, 160, 166);"></span><span>Sensory imagery</span></button><button class="chip active" style="border-color: rgb(255, 214, 10);"><span class="sw" style="background: rgb(255, 214, 10);"></span><span>Affirmation</span></button><button class="chip active" style="border-color: rgb(255, 159, 10);"><span class="sw" style="background: rgb(255, 159, 10);"></span><span>Degradation</span></button></div>
+      </div>
+
+      <!-- Bottom status (mouse tracking etc.) INSIDE the timeline card -->
+      <div class="statusbar">
+        <span id="selReadout" style="text-align:right;">No selection</span>
+      </div>
+
+      <!-- Settings related to the timeline (under the timeline) -->
+      <div class="bottom-utilities">
+        <div class="utilityGroup">
+          <label class="small" for="presetSelect">Preset</label>
+          <select id="presetSelect" class="small"><option value="Slow-burn single crescendo (10m)">Slow-burn single crescendo (10m)</option><option value="Looping tease multi-peaks (12m)">Looping tease multi-peaks (12m)</option><option value="Immediate spark + aftercare (8m)">Immediate spark + aftercare (8m)</option></select>
+          <button class="small" id="applyPreset">Apply</button>
+        </div>
+        <div class="utilityGroup">
+          <label class="small" for="viewOptions">Grid view</label>
+          <select id="viewOptions" class="small" title="View options">
+            <option value="grid5" selected="">Grid: 1 min (bold each 5)</option>
+            <option value="grid1">Grid: 1 min</option>
+            <option value="grid10">Grid: 5 min (labels only)</option>
+          </select>
+        </div>
+        <div class="utilityGroup">
+          <label class="small">Project</label>
+          <button class="small ghost" id="exportBtn">Export</button>
+          <button class="small ghost" id="importBtn">Import</button>
+          <button class="small ghost" id="randomizeBtn">Randomize</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none">
+        </div>
+      </div>
+    </section>
+
+    <!-- BASELINES (collapsible) -->
+    <section class="card" id="baselinesCard">
+      <div class="item-header" id="baselinesToggle" style="padding:0; margin-bottom:10px;">
+        <div class="section-title" style="margin:0;">Baselines (tap to expand)</div>
+        <div class="caret">›</div>
+      </div>
+      <div id="baselinesBody" style="display:none;">
+        <div class="accordion" id="baselineAcc"><div class="item"><div class="item-header"><div><div class="item-title">Loving ↔ Filthy</div><div class="item-meta" id="lovingMeta">balanced</div></div><div class="caret">›</div></div><div class="item-body"><select><option value="0">1 — pure loving</option><option value="1">2 — very loving</option><option value="2">3 — loving</option><option value="3">4 — balanced</option><option value="4">5 — dirty-sweet</option><option value="5">6 — filthy-leaning</option><option value="6">7 — filthy</option></select></div></div><div class="item"><div class="item-header"><div><div class="item-title">Gentle ↔ Aggressive</div><div class="item-meta" id="gentleMeta">gentle</div></div><div class="caret">›</div></div><div class="item-body"><select><option value="0">1 — very gentle</option><option value="1">2 — gentle</option><option value="2">3 — balanced</option><option value="3">4 — assertive</option><option value="4">5 — rough-leaning</option><option value="5">6 — aggressive-leaning</option><option value="6">7 — aggressive</option></select></div></div><div class="item"><div class="item-header"><div><div class="item-title">Light-hearted ↔ Serious</div><div class="item-meta" id="lightMeta">neutral</div></div><div class="caret">›</div></div><div class="item-body"><select><option value="0">1 — very playful</option><option value="1">2 — playful</option><option value="2">3 — light-leaning</option><option value="3">4 — neutral</option><option value="4">5 — serious-leaning</option><option value="5">6 — serious</option><option value="6">7 — very serious</option></select></div></div><div class="item"><div class="item-header"><div><div class="item-title">Tease intensity (arousal)</div><div class="item-meta" id="teaseMeta">moderate tease</div></div><div class="caret">›</div></div><div class="item-body"><select><option value="0">1 — minimal tease</option><option value="1">2 — light tease</option><option value="2">3 — tease-leaning</option><option value="3">4 — moderate tease</option><option value="4">5 — high tease</option><option value="5">6 — edge-heavy</option><option value="6">7 — relentless tease</option></select></div></div><div class="item"><div class="item-header"><div><div class="item-title">Detail level</div><div class="item-meta" id="detailMeta">rich detail</div></div><div class="caret">›</div></div><div class="item-body"><select><option value="0">1 — very sparse</option><option value="1">2 — sparse</option><option value="2">3 — light detail</option><option value="3">4 — moderate detail</option><option value="4">5 — rich detail</option><option value="5">6 — lush detail</option><option value="6">7 — poetic/layered</option></select></div></div><div class="item"><div class="item-header"><div><div class="item-title">Explicitness</div><div class="item-meta" id="explicitMeta">moderately explicit</div></div><div class="caret">›</div></div><div class="item-body"><select><option value="0">1 — polite/soft</option><option value="1">2 — sensual but direct</option><option value="2">3 — suggestive</option><option value="3">4 — moderately explicit</option><option value="4">5 — explicit</option><option value="5">6 — very explicit</option><option value="6">7 — vulgar</option></select></div></div><div class="item"><div class="item-header"><div><div class="item-title">Sensory imagery</div><div class="item-meta" id="sensoryMeta">lush multisensory</div></div><div class="caret">›</div></div><div class="item-body"><select><option value="0">1 — minimal sensory</option><option value="1">2 — light sensory</option><option value="2">3 — moderate sensory</option><option value="3">4 — vivid sensory</option><option value="4">5 — lush multisensory</option><option value="5">6 — hyper-sensory</option><option value="6">7 — synesthetic</option></select></div></div><div class="item"><div class="item-header"><div><div class="item-title">Affirmation use</div><div class="item-meta" id="affirmMeta">regular praise</div></div><div class="caret">›</div></div><div class="item-body"><select><option value="0">1 — none</option><option value="1">2 — light praise</option><option value="2">3 — gentle praise</option><option value="3">4 — regular praise</option><option value="4">5 — heavy praise</option><option value="5">6 — constant reassurance</option><option value="6">7 — devotional</option></select></div></div><div class="item"><div class="item-header"><div><div class="item-title">Degradation use</div><div class="item-meta" id="degradMeta">none</div></div><div class="caret">›</div></div><div class="item-body"><select><option value="0">1 — none</option><option value="1">2 — lightly dirty</option><option value="2">3 — dirty</option><option value="3">4 — mean-teasing</option><option value="4">5 — degradation-leaning</option><option value="5">6 — strong degradation</option><option value="6">7 — harsh degradation</option></select></div></div></div>
+      </div>
+    </section>
+
+    <!-- Scenario & Style (multi-select) -->
+    <section class="card" id="scenarioCard">
+      <div class="section-title">Scenario &amp; Style</div>
+      <div class="label-row">
+        <label for="humorSel">Humor/Banter</label>
+        <div>
+          <select id="humorSel" class="multiselect" multiple="" size="6">
+            <option>Serious/earnest</option>
+            <option>Dry wit</option>
+            <option>Light teasing</option>
+            <option>Flirty banter</option>
+            <option>Playful snark</option>
+            <option>Brat-tamer</option>
+            <option>Roleplay quips</option>
+            <option>Self-deprecating</option>
+            <option value="other">Other…</option>
+          </select>
+          <input id="humorOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+        </div>
+      </div>
+      <div class="label-row">
+        <label for="genreSel">Genre</label>
+        <div>
+          <select id="genreSel" class="multiselect" multiple="" size="8">
+            <option>Contemporary</option>
+            <option>Friends→Lovers</option>
+            <option>Enemies→Lovers</option>
+            <option>Comfort/Care</option>
+            <option>Long-distance call</option>
+            <option>Stranded / Cozy</option>
+            <option>Office</option>
+            <option>Neighbor</option>
+            <option>Roommate</option>
+            <option>Royal/Regency</option>
+            <option>Fantasy</option>
+            <option>Supernatural protective</option>
+            <option>Thriller / Protective</option>
+            <option value="other">Other…</option>
+          </select>
+          <input id="genreOther" type="text" placeholder="Your genre…" style="display:none;margin-top:8px">
+        </div>
+      </div>
+      <div class="label-row">
+        <label for="tabooSel">Taboo</label>
+        <div>
+          <select id="tabooSel" class="multiselect" multiple="" size="7">
+            <option>Risk of being overheard</option>
+            <option>Forbidden workplace (adults)</option>
+            <option>Authority roleplay (adults)</option>
+            <option>Consensual power imbalance</option>
+            <option>Ownership phrases</option>
+            <option value="other">Other…</option>
+          </select>
+          <input id="tabooOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+        </div>
+      </div>
+      <div class="label-row">
+        <label for="settingSel">Setting</label>
+        <div>
+          <select id="settingSel" class="multiselect" multiple="" size="6">
+            <option>Rainy apartment</option>
+            <option>Regency ballroom</option>
+            <option>Cozy cabin</option>
+            <option>Night drive</option>
+            <option>Office after hours</option>
+            <option value="other">Other…</option>
+          </select>
+          <input id="settingOther" type="text" placeholder="Where does it happen?" style="display:none;margin-top:8px">
+        </div>
+      </div>
+    </section>
+
+    <!-- Relationship & Delivery (multi-select) -->
+    <section class="card" id="relationshipCard">
+      <div class="section-title">Relationship &amp; Delivery</div>
+
+      <div class="label-row">
+        <label for="relationSel">Relationship</label>
+        <div>
+          <select id="relationSel" class="multiselect" multiple="" size="6">
+            <option>Strangers</option>
+            <option>New acquaintances</option>
+            <option>Friends</option>
+            <option>Exes</option>
+            <option>Established lovers</option>
+            <option value="other">Other…</option>
+          </select>
+          <input id="relationOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+        </div>
+      </div>
+
+      <div class="label-row">
+        <label for="powerSel">Power</label>
+        <div>
+          <select id="powerSel" class="multiselect" multiple="" size="5">
+            <option>Equal/gentle</option>
+            <option>Soft Dom</option>
+            <option>Firm Dom</option>
+            <option>Hard Dom</option>
+            <option value="other">Other…</option>
+          </select>
+          <input id="powerOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+        </div>
+      </div>
+
+      <div class="label-row">
+        <label for="traitSel">Traits</label>
+        <div>
+          <select id="traitSel" class="multiselect" multiple="" size="8">
+            <option>Protective</option>
+            <option>Possessive</option>
+            <option>Brat-tamer</option>
+            <option>Service Top</option>
+            <option>Praise-heavy</option>
+            <option>Denial/Edging</option>
+            <option>Guided/Mentoring</option>
+            <option>Tender</option>
+            <option>Rougher</option>
+            <option value="other">Other…</option>
+          </select>
+          <input id="traitOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+        </div>
+      </div>
+
+      <div class="subgroup">
+        <div class="label-row">
+          <label for="petSel">Pet names</label>
+          <div>
+            <select id="petSel" class="multiselect" multiple="" size="5">
+              <option>Lover names</option>
+              <option>Role titles</option>
+              <option value="other">Other…</option>
+            </select>
+            <input id="petOther" type="text" placeholder="e.g., baby, sweetheart…" style="display:none;margin-top:8px">
+          </div>
+        </div>
+
+        <div class="label-row">
+          <label for="malePersona">Male persona</label>
+          <div>
+            <select id="malePersona" class="multiselect" multiple="" size="6">
+              <option>Confident / Charming</option>
+              <option>Protective Soft-Dom</option>
+              <option>Polite / Soft-spoken</option>
+              <option>Shy / Nervous</option>
+              <option value="other">Other…</option>
+            </select>
+            <input id="maleOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+          </div>
+        </div>
+
+        <div class="label-row">
+          <label for="femalePersona">Listener vibe</label>
+          <div>
+            <select id="femalePersona" class="multiselect" multiple="" size="6">
+              <option>Neutral / Unspecified</option>
+              <option>Bratty sub</option>
+              <option>Inexperienced / Virgin</option>
+              <option>Assertive</option>
+              <option value="other">Other…</option>
+            </select>
+            <input id="femaleOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+          </div>
+        </div>
+      </div>
+
+      <div class="subgroup">
+        <div class="label-row">
+          <label for="experience">Experience gap</label>
+          <div>
+            <select id="experience" class="multiselect" multiple="" size="4">
+              <option>Peer-age / peers</option>
+              <option>Older male mentoring younger female</option>
+              <option>Older female mentoring younger male</option>
+              <option value="other">Other…</option>
+            </select>
+            <input id="expOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+          </div>
+        </div>
+
+        <div class="label-row">
+          <label for="perspective">Perspective</label>
+          <div>
+            <select id="perspective" class="multiselect" multiple="" size="4">
+              <option selected="">1st-person male → 2nd-person female (default)</option>
+              <option>3rd-person narrator</option>
+              <option value="other">Other…</option>
+            </select>
+            <input id="persOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+          </div>
+        </div>
+
+        <div class="label-row">
+          <label for="nvSounds">Non-verbal</label>
+          <div>
+            <select id="nvSounds" class="multiselect" multiple="" size="4">
+              <option>Low (omit most)</option>
+              <option selected="">Medium (describe)</option>
+              <option>High (bracketed cues)</option>
+              <option value="other">Other…</option>
+            </select>
+            <input id="nvOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+          </div>
+        </div>
+
+        <div class="label-row">
+          <label for="safetySel">Safety</label>
+          <div>
+            <select id="safetySel" class="multiselect" multiple="" size="6">
+              <option>No taboo themes</option>
+              <option>No degradation/insults</option>
+              <option>Mention condom use</option>
+              <option>No internal finish described</option>
+              <option>Aftercare on</option>
+              <option value="other">Other…</option>
+            </select>
+            <input id="safetyOther" type="text" placeholder="Describe…" style="display:none;margin-top:8px">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Your selections -->
+    <section class="card" id="selectedTagsCard" style="display: block;">
+      <div class="section-title">Your Selections</div>
+      <div id="selectedTags" style="display:flex;flex-wrap:wrap;gap:8px;"><span class="chip active"><span class="sw" style="background: rgb(61, 75, 107);"></span><span>Perspective: 1st-person male → 2nd-person female (default)</span></span><span class="chip active"><span class="sw" style="background: rgb(61, 75, 107);"></span><span>Non-verbal: Medium (describe)</span></span></div>
+    </section>
+
+    <!-- Notes (before output per requested order) -->
+    <section class="card compact">
+      <div class="section-title">Notes</div>
+      <textarea id="notes" rows="10" placeholder="Any extra instructions, themes, or reminders…"></textarea>
+    </section>
+
+    <!-- Prompt Output last -->
+    <section class="card">
+      <div class="section-title">Prompt Output</div>
+      <div id="out" class="output"></div>
+    </section>
+  </div>
+
+<script>
+// Helpers & Model
+function $(id){ return document.getElementById(id); }
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function fmt(n){ return (Math.round(n*100)/100).toString().replace(/\\.0+$/,''); }
+const scaleLabels = {
+  loving: ["pure loving","very loving","loving","balanced","dirty-sweet","filthy-leaning","filthy"],
+  gentle: ["very gentle","gentle","balanced","assertive","rough-leaning","aggressive-leaning","aggressive"],
+  light:  ["very playful","playful","light-leaning","neutral","serious-leaning","serious","very serious"],
+  tease:  ["minimal tease","light tease","tease-leaning","moderate tease","high tease","edge-heavy","relentless tease"],
+  detail: ["very sparse","sparse","light detail","moderate detail","rich detail","lush detail","poetic/layered"],
+  explicit:["polite/soft","sensual but direct","suggestive","moderately explicit","explicit","very explicit","vulgar"],
+  sensory: ["minimal sensory","light sensory","moderate sensory","vivid sensory","lush multisensory","hyper-sensory","synesthetic"],
+  affirm: ["none","light praise","gentle praise","regular praise","heavy praise","constant reassurance","devotional"],
+  degrad: ["none","lightly dirty","dirty","mean-teasing","degradation-leaning","strong degradation","harsh degradation"]
+};
+const palette = ["#0a84ff","#5e5ce6","#64d2ff","#30b0c7","#32d74b","#bf5af2","#ffa0a6","#ffd60a","#ff9f0a"];
+const initialModel = () => ({
+  lengthMin: 12,
+  tracks: [
+    { id:"loving",  name:"Loving ↔ Filthy",    color:palette[0], baseline:3, keyframes:[], hidden:false },
+    { id:"gentle",  name:"Gentle ↔ Aggressive", color:palette[1], baseline:1, keyframes:[], hidden:false },
+    { id:"light",   name:"Light ↔ Serious",     color:palette[2], baseline:3, keyframes:[], hidden:false },
+    { id:"tease",   name:"Tease intensity",     color:palette[3], baseline:3, keyframes:[], hidden:false },
+    { id:"detail",  name:"Detail level",        color:palette[4], baseline:4, keyframes:[], hidden:false },
+    { id:"explicit",name:"Explicitness",        color:palette[5], baseline:3, keyframes:[], hidden:false },
+    { id:"sensory", name:"Sensory imagery",     color:palette[6], baseline:4, keyframes:[], hidden:false },
+    { id:"affirm",  name:"Affirmation",         color:palette[7], baseline:3, keyframes:[], hidden:false },
+    { id:"degrad",  name:"Degradation",         color:palette[8], baseline:0, keyframes:[], hidden:false }
+  ],
+  events: []
+});
+let model = initialModel();
+function getTrack(id){ return model.tracks.find(t=>t.id===id); }
+
+// Undo/Redo
+const historyStack = [];
+const redoStack = [];
+function pushHistory(){ historyStack.push(JSON.stringify(model)); if(historyStack.length > 60) historyStack.shift(); redoStack.length = 0; }
+function undo(){ if(historyStack.length===0) return; redoStack.push(JSON.stringify(model)); const prev=historyStack.pop(); if(prev){ Object.assign(model, JSON.parse(prev)); draw(); renderLabels(); updateSelection(null);} }
+function redo(){ if(redoStack.length===0) return; historyStack.push(JSON.stringify(model)); const next=redoStack.pop(); if(next){ Object.assign(model, JSON.parse(next)); draw(); renderLabels(); updateSelection(null);} }
+
+// Canvas sizing
+const canvas = $("timeline"), ctx = canvas.getContext("2d");
+let DPR = window.devicePixelRatio || 1;
+let padL = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gutter')) || 180,
+    leftStart = null,
+    padR = 24, padT = 42, padB = 62, rowH = 44, eventsLaneH = 56;
+let mouseGuideX = null;
+function timelineHeight(){
+  const rows = visibleTracks().length;
+  const needed = padT + eventsLaneH + rows*rowH + padB + 10;
+  const capped = Math.min(Math.max(needed, 320), Math.floor(window.innerHeight*0.78));
+  return capped;
+}
+function resizeCanvas(){
+  const container = document.querySelector("#timelineCard");
+  const w = Math.max(420, (container?.clientWidth || window.innerWidth) - 28);
+  const h = timelineHeight();
+  leftStart = padL + 12;
+  canvas.width = Math.floor(w * DPR);
+  canvas.height = Math.floor(h * DPR);
+  canvas.style.width = w+"px";
+  canvas.style.height = h+"px";
+  draw(); renderLabels();
+}
+window.addEventListener("resize", resizeCanvas);
+document.addEventListener("DOMContentLoaded", resizeCanvas);
+
+// View options
+let gridMode = "grid5"; $("viewOptions")?.addEventListener("change", (e)=>{ gridMode = e.target.value; draw(); });
+
+// Timeline Coords
+function xToT(px){ const w = canvas.width/DPR; const start = (leftStart ?? padL); const gx = (px - start)/(w - start - padR); return clamp(gx,0,1) * model.lengthMin; }
+function tToX(t){ const w = canvas.width/DPR; const start = (leftStart ?? padL); return start + (t/model.lengthMin)*(w - start - padR); }
+function vToY(row, v){ const y0 = padT + eventsLaneH + row*rowH; const h=rowH-10; const gy = (6 - v)/6; return y0 + 7 + gy*h; }
+function yToV(row, y){ const y0 = padT + eventsLaneH + row*rowH; const h=rowH-10; const gy = clamp((y - (y0+7))/h, 0, 1); return clamp(Math.round((1-gy)*6),0,6); }
+function eventY(){ return padT + 16; }
+
+// Draw Timeline
+function visibleTracks(){ return model.tracks.filter(t=>!t.hidden); }
+function minuteTicks(){ const minutes = model.lengthMin; const arr=[]; for(let m=0;m<=minutes;m++) arr.push(m); return arr; }
+function draw(){
+  ctx.save(); ctx.scale(DPR,DPR);
+  const w = canvas.width/DPR, h = canvas.height/DPR;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = "#151e30"; ctx.fillRect(0,0,w,h);
+
+  // Horizontal row separators (extend into left gutter)
+  const vTracks = visibleTracks();
+  for(let i=0;i<=vTracks.length;i++){
+    const y0 = padT + eventsLaneH + i*rowH;
+    ctx.strokeStyle = "#1e2a40"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(leftStart ?? padL, y0); ctx.lineTo(w - padR, y0); ctx.stroke();
+  }
+  // Line below events lane
+  ctx.strokeStyle = "#28324b"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(leftStart ?? padL, padT + eventsLaneH); ctx.lineTo(w - padR, padT + eventsLaneH); ctx.stroke();
+
+  // Axes
+  ctx.strokeStyle = "#232a3a"; ctx.lineWidth=1.6;
+  ctx.beginPath(); ctx.moveTo((leftStart ?? padL), padT); ctx.lineTo((leftStart ?? padL), h-padB); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo((leftStart ?? padL), h-padB); ctx.lineTo(w-padR, h-padB); ctx.stroke();
+
+  // Minute grid + labels
+  ctx.textAlign="center"; ctx.font="14px -apple-system, system-ui";
+  minuteTicks().forEach((m)=>{
+    const x=tToX(m);
+    const major = (m%5===0);
+    if(gridMode === "grid10"){
+      if(!major) return;
+      ctx.strokeStyle = "#2c3550";
+      ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h-padB); ctx.stroke();
+      ctx.fillStyle="#dbe6ff"; ctx.fillText(m.toString(), x, h-padB+18);
+    } else if(gridMode === "grid1"){
+      ctx.strokeStyle = "#1d233a";
+      ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h-padB); ctx.stroke();
+      ctx.fillStyle="#bfc9e6"; ctx.fillText(m.toString(), x, h-padB+18);
+    } else {
+      ctx.strokeStyle = major ? "#2c3550" : "#1d233a";
+      ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h-padB); ctx.stroke();
+      if(major){ ctx.fillStyle="#dbe6ff"; ctx.fillText(m.toString(), x, h-padB+18); }
+    }
+  });
+
+  // Selection row highlight
+  if(selection && selection.row != null){
+    const y0 = padT + eventsLaneH + selection.row*rowH;
+    ctx.fillStyle = "rgba(10,132,255,0.10)";
+    ctx.fillRect(padL, y0, w-padL-padR, rowH);
+  }
+
+  // Lines & keyframes
+  vTracks.forEach((tr, i)=>{
+    // Baseline dashed
+    ctx.strokeStyle="#27395a"; ctx.setLineDash([6,5]);
+    ctx.beginPath(); ctx.moveTo(padL, vToY(i, tr.baseline)); ctx.lineTo(w-padR, vToY(i, tr.baseline)); ctx.stroke(); ctx.setLineDash([]);
+
+    // Path
+    const kf = tr.keyframes.length? tr.keyframes.slice().sort((a,b)=>a.t-b.t) : [{t:0,v:tr.baseline},{t:model.lengthMin,v:tr.baseline}];
+    ctx.strokeStyle=tr.color; ctx.lineWidth=3.2; ctx.beginPath();
+    kf.forEach((p,idx)=>{ const x=tToX(p.t), y=vToY(i,p.v); if(idx===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.stroke();
+
+    // Points
+    kf.forEach((p, idx)=>{
+      const x=tToX(p.t), y=vToY(i,p.v);
+      const selected = selection && selection.kind==="kf" && selection.trackId===tr.id && selection.idx===idx && selection.row===i;
+      ctx.fillStyle=selected ? "#ffffff" : tr.color;
+      ctx.beginPath(); ctx.arc(x,y, selected? 7.8 : 6.4, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle= selected ? tr.color : "#131b2a"; ctx.lineWidth= selected? 2.6 : 1.6; ctx.stroke();
+    });
+  });
+
+  // Events lane
+  model.events.forEach((ev, ei)=>{
+    const x=tToX(ev.t), y=eventY();
+    const col = (eventTypes.find(e=>e.type===ev.type)?.color) || "#fff";
+    const selected = selection && selection.kind==="ev" && selection.idx===ei;
+    ctx.fillStyle = selected? "#ffffff" : col;
+    ctx.beginPath(); ctx.arc(x,y, selected? 10.5 : 9.2, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle= selected? col : "#131b2a"; ctx.lineWidth= selected? 2.8 : 1.6; ctx.stroke();
+  });
+
+  // Mouse guide line
+  if(mouseGuideX != null){
+    ctx.strokeStyle = "rgba(10,132,255,0.85)";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8,6]);
+    ctx.beginPath(); ctx.moveTo(mouseGuideX, padT); ctx.lineTo(mouseGuideX, h - padB); ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  ctx.restore();
+}
+
+// Labels in gutter
+function renderLabels(){
+  const labelsDiv = $("timelineLabels");
+  labelsDiv.innerHTML = "";
+  const vTracks = visibleTracks();
+  const evDiv = document.createElement("div");
+  evDiv.className = "lbl"; evDiv.style.top = (eventY()-12)+"px"; evDiv.textContent = "Events";
+  labelsDiv.appendChild(evDiv);
+  vTracks.forEach((tr, i)=>{
+    const yMid = vToY(i,3);
+    const div = document.createElement("div");
+    div.className = "lbl";
+    div.style.top = `${yMid-10}px`;
+    div.textContent = tr.name;
+    labelsDiv.appendChild(div);
+  });
+}
+
+// Hit Testing & Interaction
+function hitPoint(mx,my){
+  const vTracks = visibleTracks();
+  for(let i=0;i<vTracks.length;i++){
+    const tr = vTracks[i];
+    const pts = tr.keyframes.length? tr.keyframes : [{t:0,v:tr.baseline},{t:model.lengthMin,v:tr.baseline}];
+    for(let j=0;j<pts.length;j++){
+      const p=pts[j]; const x=tToX(p.t), y=vToY(i,p.v);
+      const dx=mx-x, dy=my-y;
+      if(dx*dx+dy*dy < 13*13) return {kind:"kf", row:i, idx:j, trackId:tr.id, p};
+    }
+  }
+  for(let i=0;i<model.events.length;i++){
+    const ev=model.events[i]; const x=tToX(ev.t), y=eventY();
+    const dx=mx-x, dy=my-y;
+    if(dx*dx+dy*dy < 13*13) return {kind:"ev", idx:i, ev};
+  }
+  return null;
+}
+let dragging = null;
+let selection = null;
+function updateSelection(sel){
+  selection = sel;
+  const read = $("selReadout");
+  if(!sel){ read.textContent = "No selection"; return; }
+  if(sel.kind==="kf"){
+    read.textContent = `Selected: Keyframe — ${sel.trackId} @ t=${fmt(sel.p.t)}m, v=${sel.p.v}`;
+  } else if(sel.kind==="ev"){
+    read.textContent = `Selected: Event — ${eventTypes.find(e=>e.type===sel.ev.type).label} @ t=${fmt(sel.ev.t)}m`;
+  }
+  draw();
+}
+function snapIfNeeded(t, altHeld){ const snap = true && !altHeld; return snap ? Math.round(t) : t; }
+
+canvas.addEventListener("mousedown", (e)=>{
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left), my=(e.clientY - rect.top);
+  const hit = hitPoint(mx,my);
+  pushHistory();
+  if(hit){
+    dragging = hit;
+    updateSelection({...hit});
+  } else {
+    const t = snapIfNeeded(xToT(mx), e.altKey);
+    if(my < padT + eventsLaneH + 18){
+      model.events.push({type:selectedEventType, t: clamp(t, 0, model.lengthMin)});
+    } else {
+      const row = Math.floor( (my - (padT + eventsLaneH)) / rowH );
+      const vTracks = visibleTracks();
+      if(row>=0 && row<vTracks.length){
+        const v = yToV(row, my);
+        const tr = vTracks[row];
+        tr.keyframes.push({t: clamp(t,0,model.lengthMin), v});
+      }
+    }
+    draw(); renderLabels(); updateSelection(null);
+  }
+});
+canvas.addEventListener("mousemove",(e)=>{
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left), my=(e.clientY - rect.top);
+  // Cursor readout (bottom inside card)
+  const t = clamp(xToT(mx),0,model.lengthMin);
+  let rowTxt = "—";
+  const row = Math.floor( (my - (padT + eventsLaneH)) / rowH );
+  const vTracks = visibleTracks();
+  if(row>=0 && row<vTracks.length){ rowTxt = vTracks[row].id; }
+  $("cursorReadout").textContent = `t=${fmt(t)}m, value=${row>=0&&row<vTracks.length ? yToV(row,my) : "—"}, track=${rowTxt}`;
+
+  // Tooltip + guide
+  const hit = hitPoint(mx,my);
+  const tip = $("tooltip");
+  mouseGuideX = clamp(mx, (leftStart ?? padL), canvas.width/DPR - padR);
+  draw();
+
+  if(hit){
+    tip.style.left = e.clientX + "px";
+    tip.style.top = e.clientY + "px";
+    if(hit.kind==="kf"){
+      tip.innerHTML = `<b>${hit.trackId}</b><br>t=${fmt(hit.p.t)}m • v=${hit.p.v}<div class="small">Drag to move • Double-click to delete</div>`;
+    } else {
+      tip.innerHTML = `<b>${eventTypes.find(et=>et.type===hit.ev.type).label}</b><br>t=${fmt(hit.ev.t)}m<div class="small">Drag to move • Double-click to delete</div>`;
+    }
+    tip.style.opacity = 1;
+  } else {
+    tip.style.opacity = 0;
+  }
+
+  if(!dragging) return;
+  if(dragging.kind==="kf"){
+    const vTracks2 = visibleTracks();
+    const row2 = dragging.row; const tr = vTracks2[row2];
+    if(tr.keyframes.length===0){ tr.keyframes = [{t:0,v:tr.baseline},{t:model.lengthMin,v:tr.baseline}]; }
+    const p = tr.keyframes[dragging.idx] || tr.keyframes[0];
+    p.t = clamp(snapIfNeeded(xToT(mx), e.altKey),0,model.lengthMin);
+    p.v = clamp(yToV(row2,my),0,6);
+  }else if(dragging.kind==="ev"){
+    dragging.ev.t = clamp(snapIfNeeded(xToT(mx), e.altKey),0,model.lengthMin);
+  }
+  draw(); renderLabels();
+});
+["mouseup","mouseleave"].forEach(ev=> canvas.addEventListener(ev,()=> { dragging=null; mouseGuideX=null; draw(); }));
+canvas.addEventListener("dblclick",(e)=>{
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left), my=(e.clientY - rect.top);
+  const hit = hitPoint(mx,my);
+  if(!hit) return;
+  pushHistory();
+  if(hit.kind==="kf"){
+    const vTracks = visibleTracks();
+    const tr = vTracks[hit.row];
+    if(tr.keyframes.length>0){ tr.keyframes.splice(hit.idx,1); draw(); renderLabels(); updateSelection(null); }
+  }else if(hit.kind==="ev"){ model.events.splice(hit.idx,1); draw(); renderLabels(); updateSelection(null); }
+});
+
+// Keyboard shortcuts
+window.addEventListener("keydown",(e)=>{
+  if(e.key === "Delete" || e.key === "Backspace"){
+    if(!selection) return;
+    e.preventDefault(); pushHistory();
+    if(selection.kind==="kf"){
+      const vTracks = visibleTracks();
+      const tr = vTracks[selection.row];
+      tr.keyframes.splice(selection.idx,1);
+      updateSelection(null);
+    } else if(selection.kind==="ev"){
+      model.events.splice(selection.idx,1);
+      updateSelection(null);
+    }
+    draw(); renderLabels();
+  } else if(e.key.toLowerCase()==="z" && (e.ctrlKey || e.metaKey) && e.shiftKey){
+    e.preventDefault(); redo();
+  } else if(e.key.toLowerCase()==="z" && (e.ctrlKey || e.metaKey)){
+    e.preventDefault(); undo();
+  } else if(e.key.toLowerCase()==="h"){
+    if(selection && selection.kind==="kf"){
+      const tr = visibleTracks()[selection.row];
+      if(tr){
+        const full = model.tracks.find(t=>t.id===tr.id);
+        full.hidden = !full.hidden;
+        buildTrackToggles(); resizeCanvas(); draw(); renderLabels(); updateSelection(null);
+      }
+    }
+  } else if(e.key === "Escape"){
+    updateSelection(null);
+  }
+});
+
+// Events palette & presets
+const eventTypes = [
+  { type:"turn",       label:"Story turn", color:"#64d2ff" },
+  { type:"escalate",   label:"Escalation", color:"#32d74b" },
+  { type:"peak",       label:"Peak",       color:"#ff375f" },
+  { type:"valley",     label:"Valley",     color:"#5e5ce6" },
+  { type:"loop",       label:"Loop tease", color:"#ffd60a" },
+  { type:"countdown",  label:"Countdown",  color:"#a0a7b5" },
+  { type:"climax",     label:"Climax",     color:"#ff9f0a" },
+  { type:"aftercare",  label:"Aftercare",  color:"#30b0c7" }
+];
+let selectedEventType="turn";
+(function initEventBar(){
+  const bar=$("evbar"); bar.innerHTML="";
+  eventTypes.forEach(et=>{
+    const b=document.createElement("button"); b.className="evbtn"+(et.type===selectedEventType?" active":""); b.type="button";
+    const sw=document.createElement("span"); sw.className="sw"; sw.style.background=et.color;
+    b.appendChild(sw); b.appendChild(document.createTextNode(et.label));
+    b.addEventListener("click",()=>{
+      selectedEventType=et.type;
+      bar.querySelectorAll(".evbtn").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+    });
+    bar.appendChild(b);
+  });
+})();
+
+// Track toggles
+function buildTrackToggles(){
+  const host = $("legend"); host.innerHTML="";
+  model.tracks.forEach(tr=>{
+    const b=document.createElement("button"); b.className="chip";
+    const sw=document.createElement("span"); sw.className="sw"; sw.style.background=tr.color; b.appendChild(sw);
+    const txt=document.createElement("span"); txt.textContent=tr.name; b.appendChild(txt);
+    if(!tr.hidden){ b.classList.add("active"); } else { b.classList.add("inactive"); }
+    b.style.borderColor = tr.hidden? "var(--border)" : tr.color;
+    b.addEventListener("click",()=>{ tr.hidden = !tr.hidden; buildTrackToggles(); resizeCanvas(); draw(); renderLabels(); });
+    host.appendChild(b);
+  });
+}
+
+// Baseline accordion (same features) + Collapsible control
+const baselineList = [
+  ["loving","Loving ↔ Filthy"],
+  ["gentle","Gentle ↔ Aggressive"],
+  ["light","Light-hearted ↔ Serious"],
+  ["tease","Tease intensity (arousal)"],
+  ["detail","Detail level"],
+  ["explicit","Explicitness"],
+  ["sensory","Sensory imagery"],
+  ["affirm","Affirmation use"],
+  ["degrad","Degradation use"]
+];
+function buildBaselineAccordion(){
+  const acc = $("baselineAcc"); acc.innerHTML="";
+  baselineList.forEach(([id,label])=>{
+    const it = document.createElement("div"); it.className="item";
+    const header = document.createElement("div"); header.className="item-header";
+    const left = document.createElement("div");
+    const title = document.createElement("div"); title.className="item-title"; title.textContent=label; left.appendChild(title);
+    const meta = document.createElement("div"); meta.className="item-meta"; meta.id = id+"Meta"; meta.textContent = scaleLabels[id][getTrack(id).baseline]; left.appendChild(meta);
+    header.appendChild(left);
+    const caret = document.createElement("div"); caret.className="caret"; caret.textContent="›"; header.appendChild(caret);
+    header.addEventListener("click",()=>{ it.classList.toggle("open"); });
+    it.appendChild(header);
+    const body = document.createElement("div"); body.className="item-body";
+    const select = document.createElement("select");
+    for(let i=0;i<7;i++){
+      const o=document.createElement("option"); o.value=i; o.textContent = `${i+1} — ${scaleLabels[id][i]}`;
+      if(i===getTrack(id).baseline) o.selected = true;
+      select.appendChild(o);
+    }
+    select.addEventListener("change",()=>{
+      getTrack(id).baseline = parseInt(select.value,10);
+      $(id+"Meta").textContent = scaleLabels[id][getTrack(id).baseline];
+      draw(); renderLabels();
+    });
+    body.appendChild(select); it.appendChild(body); acc.appendChild(it);
+  });
+}
+$("baselinesToggle").addEventListener("click", ()=>{
+  const body=$("baselinesBody"); const caret = document.querySelector("#baselinesToggle .caret");
+  const open = body.style.display !== "none";
+  body.style.display = open ? "none" : "block";
+  caret.style.transform = open ? "rotate(0deg)" : "rotate(90deg)";
+});
+
+// 'Other' inputs visibility + Selected Tags (multi-select aware)
+const multiIds = ["humorSel","genreSel","tabooSel","settingSel","relationSel","powerSel","traitSel","petSel","malePersona","femalePersona","experience","perspective","nvSounds","safetySel"];
+function getMultiValues(selId){
+  const s=$(selId); if(!s) return [];
+  return Array.from(s.selectedOptions || []).map(o=>o.value);
+}
+function toggleOtherVisibility(selId, otherId){
+  const vals = getMultiValues(selId);
+  const o=$(otherId); if(!o) return;
+  o.style.display = vals.includes("other") ? "block" : "none";
+}
+const pairs = [
+  ["humorSel","humorOther"],
+  ["genreSel","genreOther"],
+  ["tabooSel","tabooOther"],
+  ["settingSel","settingOther"],
+  ["relationSel","relationOther"],
+  ["powerSel","powerOther"],
+  ["traitSel","traitOther"],
+  ["petSel","petOther"],
+  ["malePersona","maleOther"],
+  ["femalePersona","femaleOther"],
+  ["experience","expOther"],
+  ["perspective","persOther"],
+  ["nvSounds","nvOther"],
+  ["safetySel","safetyOther"]
+];
+pairs.forEach(([sel,oth])=>{
+  const s=$(sel), o=$(oth);
+  if(s && o){
+    const handler=()=>{ toggleOtherVisibility(sel,oth); updateSelectedTags(); };
+    s.addEventListener("change", handler);
+    o.addEventListener("input", updateSelectedTags);
+    // initial
+    toggleOtherVisibility(sel,oth);
+  }
+});
+multiIds.forEach(id=> $(id)?.addEventListener("change", updateSelectedTags));
+
+function getValuesWithOther(selId, otherId){
+  const vals = getMultiValues(selId);
+  if(vals.includes("other")){
+    const oth = ($(otherId)?.value || "").trim();
+    if(oth) vals.splice(vals.indexOf("other"), 1, oth); else vals.splice(vals.indexOf("other"), 1);
+  }
+  return vals;
+}
+
+function updateSelectedTags(){
+  const out = $("selectedTags"); const card = $("selectedTagsCard");
+  const items = [
+    ["Humor", getValuesWithOther("humorSel","humorOther")],
+    ["Genre", getValuesWithOther("genreSel","genreOther")],
+    ["Taboo", getValuesWithOther("tabooSel","tabooOther")],
+    ["Setting", getValuesWithOther("settingSel","settingOther")],
+    ["Relationship", getValuesWithOther("relationSel","relationOther")],
+    ["Power", getValuesWithOther("powerSel","powerOther")],
+    ["Traits", getValuesWithOther("traitSel","traitOther")],
+    ["Pet names", getValuesWithOther("petSel","petOther")],
+    ["Male persona", getValuesWithOther("malePersona","maleOther")],
+    ["Listener", getValuesWithOther("femalePersona","femaleOther")],
+    ["Experience", getValuesWithOther("experience","expOther")],
+    ["Perspective", getValuesWithOther("perspective","persOther")],
+    ["Non-verbal", getValuesWithOther("nvSounds","nvOther")],
+    ["Safety", getValuesWithOther("safetySel","safetyOther")]
+  ].filter(([k,v])=> v && v.length>0);
+
+  out.innerHTML = "";
+  items.forEach(([k,arr])=>{
+    const b=document.createElement("span"); b.className="chip active";
+    const sw=document.createElement("span"); sw.className="sw"; sw.style.background="#3d4b6b"; b.appendChild(sw);
+    const txt=document.createElement("span"); txt.textContent = `${k}: ${arr.join(", ")}`; b.appendChild(txt);
+    out.appendChild(b);
+  });
+  card.style.display = items.length ? "block" : "none";
+}
+
+// Controls
+$("length").addEventListener("change",()=>{ model.lengthMin = clamp(parseInt($("length").value||"12",10),3,60); $("length").value = model.lengthMin; draw(); renderLabels(); });
+
+$("resetTimeline").addEventListener("click",()=>{
+  model = initialModel();
+  buildTrackToggles(); buildBaselineAccordion();
+  $("length").value = model.lengthMin;
+  resizeCanvas(); draw(); renderLabels(); updateSelection(null);
+  updateSelectedTags();
+});
+
+// Serialize & Generate (multi-select aware)
+function serializeTimeline(){
+  const lines = [];
+  lines.push(`Length: ~${model.lengthMin} minutes.`);
+  visibleTracks().forEach((tr)=>{
+    const kf = tr.keyframes.length? tr.keyframes.slice().sort((a,b)=>a.t-b.t) : [{t:0,v:tr.baseline},{t:model.lengthMin,v:tr.baseline}];
+    const parts = kf.map(p=> `${fmt(p.t)}→${p.v}(${scaleLabels[tr.id][clamp(p.v,0,6)]})`);
+    lines.push(`${tr.name}: ${parts.join(" | ")}`);
+  });
+  if(model.events.length){
+    const byT = model.events.slice().sort((a,b)=>a.t-b.t).map(ev=> `${fmt(ev.t)}: ${eventTypes.find(e=>e.type===ev.type).label}`);
+    lines.push("Events: " + byT.join(" | "));
+  }
+  return lines.join("\\n");
+}
+function valsToLine(label, arr){
+  if(!arr || !arr.length) return "";
+  return `${label}: ${arr.join(", ")}`;
+}
+function genPrompt(){
+  const blocks=[];
+  blocks.push("== Objective ==");
+  blocks.push("Write an M4F audio script for adult, consenting audiences. Output script only (no meta commentary).");
+
+  // Tone summary from baselines
+  blocks.push(`Tone: ${scaleLabels["loving"][getTrack("loving").baseline]}, ${scaleLabels["gentle"][getTrack("gentle").baseline]}, and ${scaleLabels["light"][getTrack("light").baseline]}.`);
+
+  // Scenario selections (multi)
+  const humor = getValuesWithOther("humorSel","humorOther");
+  const genre = getValuesWithOther("genreSel","genreOther");
+  const taboo = getValuesWithOther("tabooSel","tabooOther");
+  const setting = getValuesWithOther("settingSel","settingOther");
+  const scenLines = [
+    valsToLine("Humor/Banter", humor),
+    valsToLine("Genre", genre),
+    valsToLine("Taboo", taboo.length? taboo.map(x=>x+" (consenting adults roleplay)").join(", ") : ""),
+    valsToLine("Setting", setting)
+  ].filter(Boolean);
+  if(scenLines.length) blocks.push("Scenario: " + scenLines.join(" • "));
+
+  // Relationship & delivery (multi)
+  const relation = getValuesWithOther("relationSel","relationOther");
+  const power = getValuesWithOther("powerSel","powerOther");
+  const trait = getValuesWithOther("traitSel","traitOther");
+  const pet = getValuesWithOther("petSel","petOther");
+  const maleP = getValuesWithOther("malePersona","maleOther");
+  const femP = getValuesWithOther("femalePersona","femaleOther");
+  const exp = getValuesWithOther("experience","expOther");
+  const persp = getValuesWithOther("perspective","persOther");
+  const nv = getValuesWithOther("nvSounds","nvOther");
+  const safety = getValuesWithOther("safetySel","safetyOther");
+
+  blocks.push(`Relationship: ${relation.join(", ") || "unspecified"}. Power: ${power.join(", ") || "gentle"}. Trait focus: ${trait.join(", ") || "—"}. Pet names: ${pet.join(", ") || "none"}.`);
+  blocks.push(`Personas: Male=${maleP.join(", ") || "Confident / Charming"}; Listener=${femP.join(", ") || "Neutral / Unspecified"}. Experience gap: ${exp.join(", ") || "Peer-age / peers"}. Perspective: ${persp.join(", ") || "1st-person male → 2nd-person female (default)"}. Non-verbal: ${nv.join(", ") || "Medium (describe)"}.`);
+
+  // Timeline
+  blocks.push(""); blocks.push("== Timeline directives =="); blocks.push(serializeTimeline());
+
+  // Safety & Notes
+  if(safety.length) blocks.push(`\n== Safety ==\n${safety.join(", ")}`);
+  const notes = $("notes").value.trim();
+  if(notes) blocks.push(`\n== Notes ==\n${notes}`);
+
+  return blocks.join("\\n");
+}
+$("gen").addEventListener("click",()=>{ $("out").textContent = genPrompt(); $("copied").style.display="none"; });
+$("copy").addEventListener("click", async ()=>{
+  try{ await navigator.clipboard.writeText($("out").textContent || ""); $("copied").style.display="inline"; setTimeout(()=> $("copied").style.display="none", 1200); }
+  catch(e){ alert("Copy failed — select the text and copy manually."); }
+});
+
+// Export/Import
+$("exportBtn").addEventListener("click",()=>{
+  const data = JSON.stringify(model, null, 2);
+  const blob = new Blob([data], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "m4f_timeline_project.json"; a.click();
+  URL.revokeObjectURL(url);
+});
+$("importBtn").addEventListener("click",()=> $("importFile").click());
+$("importFile").addEventListener("change",(e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const obj = JSON.parse(ev.target.result);
+      Object.assign(model, obj);
+      buildTrackToggles(); draw(); renderLabels(); updateSelection(null); resizeCanvas();
+    }catch(err){ alert("Invalid JSON file."); }
+  };
+  reader.readAsText(file);
+});
+
+// Presets
+const presets = {
+  "Slow-burn single crescendo (10m)": function(){
+    model = initialModel(); model.lengthMin=10;
+    ["loving","gentle","light","tease","detail","explicit","sensory","affirm"].forEach(id=>getTrack(id).keyframes=[]);
+    getTrack("tease").keyframes = [{t:0,v:1},{t:6,v:3},{t:8.5,v:5},{t:10,v:2}];
+    getTrack("explicit").keyframes = [{t:0,v:1},{t:7,v:3},{t:9.5,v:5}];
+    getTrack("loving").keyframes = [{t:0,v:3},{t:10,v:4}];
+    getTrack("affirm").keyframes = [{t:0,v:3},{t:10,v:4}];
+    model.events = [{type:"turn", t:3.5},{type:"escalate", t:6},{type:"peak", t:9.5},{type:"climax", t:9.8},{type:"aftercare", t:10}];
+  },
+  "Looping tease multi-peaks (12m)": function(){
+    model = initialModel(); model.lengthMin=12;
+    getTrack("tease").keyframes = [{t:0,v:3},{t:3,v:5},{t:5,v:2},{t:7.5,v:5},{t:9.5,v:2},{t:11.2,v:6},{t:12,v:3}];
+    getTrack("explicit").keyframes = [{t:0,v:2},{t:4,v:4},{t:8,v:3},{t:11.2,v:5}];
+    getTrack("affirm").keyframes = [{t:0,v:3},{t:6,v:4},{t:12,v:3}];
+    getTrack("degrad").keyframes = [{t:0,v:0},{t:5.5,v:2},{t:7.8,v:3},{t:12,v:1}];
+    model.events = [
+      {type:"turn", t:2.5},{type:"loop", t:3},{type:"peak", t:4.8},{type:"valley", t:5.2},
+      {type:"loop", t:7.5},{type:"peak", t:7.9},{type:"valley", t:9.2},
+      {type:"countdown", t:11.1},{type:"climax", t:11.3},{type:"aftercare", t:11.7}
+    ];
+  },
+  "Immediate spark + aftercare (8m)": function(){
+    model = initialModel(); model.lengthMin=8;
+    getTrack("explicit").keyframes = [{t:0,v:4},{t:3,v:5},{t:6.5,v:6}];
+    getTrack("tease").keyframes = [{t:0,v:4},{t:2,v:5},{t:4,v:3},{t:6.5,v:6},{t:8,v:2}];
+    getTrack("affirm").keyframes = [{t:0,v:3},{t:8,v:4}];
+    model.events = [
+      {type:"escalate", t:0.5},{type:"peak", t:2.2},{type:"valley", t:4.0},{type:"countdown", t:6.2},{type:"climax", t:6.5},{type:"aftercare", t:7.4}
+    ];
+  }
+};
+(function initPresetSelect(){
+  const sel=$("presetSelect"); sel.innerHTML="";
+  Object.keys(presets).forEach(name=>{ const o=document.createElement("option"); o.value=name; o.textContent=name; sel.appendChild(o); });
+})();
+$("applyPreset").addEventListener("click",()=>{
+  presets[$("presetSelect").value]();
+  $("length").value = model.lengthMin;
+  buildTrackToggles();
+  resizeCanvas(); draw(); renderLabels();
+  $("copied").style.display="none";
+});
+presets["Looping tease multi-peaks (12m)"]();
+$("length").value = model.lengthMin;
+buildTrackToggles();
+buildBaselineAccordion();
+resizeCanvas();
+draw();
+renderLabels();
+updateSelectedTags();
+
+// === Randomize timeline ===
+function randomizeTimeline(){
+  pushHistory();
+  // keep existing length
+  const minutes = model.lengthMin;
+  // Randomize keyframes per visible track
+  model.tracks.forEach(tr => {
+    // 0–1 chance to hide untouched tracks? keep visible as-is.
+    const kcount = Math.floor(Math.random()*3)+3; // 3–5 points
+    const tset = new Set();
+    const frames = [];
+    for(let i=0;i<kcount;i++){
+      let t = +(Math.random()*minutes).toFixed(2);
+      // ensure uniqueness
+      while(tset.has(t)) { t = +(Math.random()*minutes).toFixed(2); } t = +(Math.random()*minutes).toFixed(2);
+      tset.add(t);
+      const v = Math.floor(Math.random()*7); // 0–6
+      frames.push({t, v});
+    }
+    frames.sort((a,b)=>a.t-b.t);
+    tr.keyframes = frames;
+  });
+  // Randomize events
+  model.events = [];
+  const evCount = Math.floor(Math.random()*4)+2; // 2–5 events
+  for(let i=0;i<evCount;i++){
+    const t = +(Math.random()*minutes).toFixed(2);
+    const et = eventTypes[Math.floor(Math.random()*eventTypes.length)].type;
+    model.events.push({ t, type: et });
+  }
+  model.events.sort((a,b)=>a.t-b.t);
+  selection = null;
+  draw(); renderLabels(); updateSelection(null);
+}
+$("randomizeBtn")?.addEventListener("click", randomizeTimeline);
+
+
+// === Deletable chips in "Your Selections" ===
+(function(){
+  const container = $("selectedTags");
+  if(!container) return;
+  container.addEventListener("click", (e)=>{
+    let chip = e.target.closest(".chip");
+    if(!chip) return;
+    const text = chip.textContent.trim();
+    // Try to infer the value portion "Label: Value" -> Value
+    let value = text.includes(":") ? text.split(":").slice(1).join(":").trim() : text;
+    // Deselect matching option(s) in multiselects
+    const selects = document.querySelectorAll("select.multiselect");
+    selects.forEach(sel => {
+      let changed = false;
+      Array.from(sel.options).forEach(opt => {
+        if(opt.selected && (opt.text.trim() === value || value.includes(opt.text.trim()))){
+          opt.selected = false; changed = true;
+        }
+      });
+      if(changed){
+        sel.dispatchEvent(new Event("change", {bubbles:true}));
+      }
+    });
+    // Remove chip from UI
+    chip.remove();
+  });
+})();
+
+</script>
+
+
+</body></html>
